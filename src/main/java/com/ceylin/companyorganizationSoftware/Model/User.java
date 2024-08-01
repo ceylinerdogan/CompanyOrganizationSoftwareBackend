@@ -2,7 +2,6 @@ package com.ceylin.companyorganizationSoftware.Model;
 
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,6 +40,8 @@ public class User {
 
     @Column(name = "Deleted_At")
     private LocalDateTime deletedAt;
+
+
 
     public Long getId() {
         return id;
