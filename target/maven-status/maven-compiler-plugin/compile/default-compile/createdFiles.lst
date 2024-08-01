@@ -1,0 +1,12 @@
+com\ceylin\companyorganizationSoftware\Config\SecurityConfig.class
+com\ceylin\companyorganizationSoftware\Model\User.class
+com\ceylin\companyorganizationSoftware\CompanyorganizationSoftwareApplication.class
+com\ceylin\companyorganizationSoftware\Controller\AuthController.class
+com\ceylin\companyorganizationSoftware\Service\UserDetailsServiceImpl.class
+com\ceylin\companyorganizationSoftware\Service\UserService.class
+com\ceylin\companyorganizationSoftware\Dto\LoginRequest.class
+com\ceylin\companyorganizationSoftware\Service\EmailService.class
+com\ceylin\companyorganizationSoftware\Repository\PasswordResetTokenRepository.class
+com\ceylin\companyorganizationSoftware\Repository\UserRepository.class
+com\ceylin\companyorganizationSoftware\Model\PasswordResetToken.class
+com\ceylin\companyorganizationSoftware\Dto\RegisterRequest.class
