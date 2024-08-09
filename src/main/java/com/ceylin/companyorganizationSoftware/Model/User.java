@@ -3,7 +3,11 @@ package com.ceylin.companyorganizationSoftware.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Entity
 @Table(name = "users")
@@ -11,128 +15,64 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Setter
+@Getter
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "Role_ID")
-    private Integer roleId;
-
-    @Column(name = "Department_ID")
-    private Integer departmentId;
-
+//    @Column(name = "Role_ID")
+//    private Integer roleId;
+//
+////    @Column(name = "Department_ID")
+//    private Integer departmentId;
 
     private String firstName;
 
-
     private String lastName;
-
 
     private String email;
 
-
     private String password;
 
-    @Column(nullable = false)
-    private Boolean enabled;
+//    private Boolean enabled;
+//
+//    private Boolean active;
+//
+//    @Column(name = "Created_At")
+//    private LocalDateTime createdAt;
+//
+//    @Column(name = "Deleted_At")
+//    private LocalDateTime deletedAt;
 
-    @Column(nullable = false)
-    private Boolean active;
-
-    @Column(name = "Created_At", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "Deleted_At")
-    private LocalDateTime deletedAt;
-
-
-
-    public Long getId() {
-        return id;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public String getUsername() {
+        return null;
     }
 
-    public Integer getRoleId() {
-        return roleId;
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
     }
 
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
     }
 
-    public Integer getDepartmentId() {
-        return departmentId;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
     }
 
-    public void setDepartmentId(Integer departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }
