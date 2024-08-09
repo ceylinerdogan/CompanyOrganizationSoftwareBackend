@@ -7,6 +7,8 @@ com\ceylin\companyorganizationSoftware\Service\UserService.class
 com\ceylin\companyorganizationSoftware\Dto\LoginRequest.class
 com\ceylin\companyorganizationSoftware\Service\EmailService.class
 com\ceylin\companyorganizationSoftware\Repository\PasswordResetTokenRepository.class
+com\ceylin\companyorganizationSoftware\Utils\JwtUtils.class
+com\ceylin\companyorganizationSoftware\Config\JwtAuthTokenFilter.class
 com\ceylin\companyorganizationSoftware\Repository\UserRepository.class
 com\ceylin\companyorganizationSoftware\Model\PasswordResetToken.class
 com\ceylin\companyorganizationSoftware\Dto\RegisterRequest.class

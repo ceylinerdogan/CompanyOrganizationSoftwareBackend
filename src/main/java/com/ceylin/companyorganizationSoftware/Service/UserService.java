@@ -31,15 +31,6 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    @Lazy
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);

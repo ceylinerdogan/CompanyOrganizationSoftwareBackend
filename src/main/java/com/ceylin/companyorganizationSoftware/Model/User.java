@@ -2,15 +2,15 @@ package com.ceylin.companyorganizationSoftware.Model;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "users")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,16 +22,16 @@ public class User {
     @Column(name = "Department_ID")
     private Integer departmentId;
 
-    @Column(nullable = false)
-    private String name;
 
-    @Column(nullable = false)
-    private String surname;
+    private String firstName;
 
-    @Column(nullable = false, unique = true)
+
+    private String lastName;
+
+
     private String email;
 
-    @Column(nullable = false)
+
     private String password;
 
     @Column(nullable = false)
@@ -72,20 +72,20 @@ public class User {
         this.departmentId = departmentId;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {
