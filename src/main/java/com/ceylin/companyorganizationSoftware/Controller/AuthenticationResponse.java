@@ -1,11 +1,15 @@
-package com.ceylin.companyorganizationSoftware.Controller;<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>public class AuthenticationResponse {
+package com.ceylin.companyorganizationSoftware.Controller;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AuthenticationResponse {
+  private String token;
+
 }
