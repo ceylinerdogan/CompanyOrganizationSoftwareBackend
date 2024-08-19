@@ -4,29 +4,33 @@ package com.ceylin.companyorganizationSoftware.Model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 
-@Entity
-@Table(name = "users")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Data
+@Builder
+@EqualsAndHashCode
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(name = "Role_ID")
-//    private Integer roleId;
-//
-////    @Column(name = "Department_ID")
-//    private Integer departmentId;
+    @ManyToOne
+    @JoinColumn (name = "Role_ID", nullable = false)
+    private UserRole userRole;
+
+    @Column(name = "Department_ID")
+    private Integer departmentId;
 
     private String firstName;
 
@@ -36,43 +40,50 @@ public class User implements UserDetails {
 
     private String password;
 
-//    private Boolean enabled;
-//
-//    private Boolean active;
-//
-//    @Column(name = "Created_At")
-//    private LocalDateTime createdAt;
-//
-//    @Column(name = "Deleted_At")
-//    private LocalDateTime deletedAt;
+    @Column(name = "isEnabled",nullable = false )
+    private Boolean isEnabled = false;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt= LocalDateTime.now();
+
+    @Column(name = "Deleted_At")
+    private LocalDateTime deletedAt;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        SimpleGrantedAuthority authority= new SimpleGrantedAuthority(userRole.getName());
+        return Collections.singletonList(authority);
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return email;
+    }
+
+    @Override
+    public String getPassword(){
+        return password;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return isEnabled;
     }
+
 }

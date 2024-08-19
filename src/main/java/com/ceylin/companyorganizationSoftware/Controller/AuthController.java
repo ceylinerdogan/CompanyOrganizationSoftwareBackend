@@ -1,11 +1,10 @@
 package com.ceylin.companyorganizationSoftware.Controller;
 
 import com.ceylin.companyorganizationSoftware.Dto.LoginRequest;
-import com.ceylin.companyorganizationSoftware.Dto.RegisterRequest;
+import com.ceylin.companyorganizationSoftware.Dto.ActivateRequest;
+import com.ceylin.companyorganizationSoftware.Dto.SetPasswordRequest;
 import com.ceylin.companyorganizationSoftware.Service.AuthenticationService;
-import com.ceylin.companyorganizationSoftware.Service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,12 +22,16 @@ public class AuthController {
 
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest));
+    @PostMapping("/activate-user")
+    public String activate(@RequestBody ActivateRequest activateRequest) throws Exception {
 
+        return authService.activate(activateRequest.getEmail());
     }
 
+    @PostMapping("/set-password")
+    public String setPassword(@RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
+
+        return authService.setPassword(setPasswordRequest.getToken(), setPasswordRequest.getPassword());
+    }
 
 }
