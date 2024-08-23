@@ -1,12 +1,21 @@
 package com.ceylin.companyorganizationSoftware.Service;
 
 import com.ceylin.companyorganizationSoftware.Config.JwtService;
-import com.ceylin.companyorganizationSoftware.Controller.AuthenticationResponse;
-import com.ceylin.companyorganizationSoftware.Dto.LoginRequest;
+
+import com.ceylin.companyorganizationSoftware.Dto.Request.ActivateRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Request.AddUserRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Response.ActivationResponse;
+import com.ceylin.companyorganizationSoftware.Dto.Response.AuthenticationResponse;
+import com.ceylin.companyorganizationSoftware.Dto.Request.LoginRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
+import com.ceylin.companyorganizationSoftware.Model.User;
+import com.ceylin.companyorganizationSoftware.Model.UserRole;
 import com.ceylin.companyorganizationSoftware.Repository.UserRepository;
 import com.ceylin.companyorganizationSoftware.token.ConfirmationToken;
 import com.ceylin.companyorganizationSoftware.token.ConfirmationTokenRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,8 +48,8 @@ public class AuthenticationService {
     return AuthenticationResponse.builder().token(jwt).build();
   }
 
-  public String activate(String email){
-    var user = userRepository.findByEmail(email)
+  public  AuthenticationResponse activate(ActivateRequest activateRequest){
+    var user = userRepository.findByEmail(activateRequest.getEmail())
             .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
     if (user.getPassword() != null || user.isEnabled()) {
@@ -48,28 +57,40 @@ public class AuthenticationService {
     }
     ConfirmationToken token = new ConfirmationToken(user);
     confirmationTokenRepository.save(token);
+    System.out.println("Generated token: " + token.getToken());
 
-    String activationLink = "http://localhost:8080/api/auth/set-password?token=" + token.getToken();
+    String activationLink = "http://localhost:8080/api/auth/set-password";
     emailService.sendEmail(user.getEmail(), "Activate your account",
             "Click the link to set your password: " + activationLink);
 
-    return "Activation email sent.";
+    // In activate method
+
+    var jwt = jwtService.generateToken(user);
+    System.out.println("Generated baerer token: " + jwtService.generateToken(user));
+
+    return AuthenticationResponse.builder().token(jwt).build();
   }
-  public String setPassword(String token, String password) {
+  public ResponseEntity<Response<Object>> setPassword(String token, String password) {
+    System.out.println("Received token: " + token);
     var confirmationToken = confirmationTokenRepository.findByToken(token)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid or expired token!"));
+            .orElseThrow(() -> new IllegalArgumentException("Invalid token!"));
 
     if (confirmationToken.getExpiryDate().before(new Date())) {
       throw new IllegalArgumentException("Token expired.");
     }
 
-    var user = confirmationToken.getUser();
+    if(!PasswordValidator.isValid(password)){
+      return  Response.ok("Password does not meet the required criteria",null);
+    }
+
+    var user = userRepository.findById(confirmationToken.getUser().getId())
+            .orElseThrow(() -> new EntityNotFoundException("User not found"));
     user.setPassword(passwordEncoder.encode(password));
     user.setIsEnabled(true);
     userRepository.save(user);
     confirmationTokenRepository.delete(confirmationToken);
 
-    return "Account activated successfully.";
+    return Response.ok("Password set successfully",confirmationToken.getToken());
   }
 
 }

@@ -29,8 +29,13 @@ public class User implements UserDetails {
     @JoinColumn (name = "Role_ID", nullable = false)
     private UserRole userRole;
 
-    @Column(name = "Department_ID")
-    private Integer departmentId;
+    @ManyToOne
+    @JoinColumn(name = "Department_ID")
+    private Department department;
+
+    @ManyToOne
+    @JoinColumn(name = "Company_ID")
+    private Company company;
 
     private String firstName;
 

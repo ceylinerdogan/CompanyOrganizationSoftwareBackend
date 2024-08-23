@@ -1,4 +1,4 @@
-package com.ceylin.companyorganizationSoftware.Dto;
+package com.ceylin.companyorganizationSoftware.Dto.Request;
 
 import jakarta.persistence.Entity;
 import lombok.*;

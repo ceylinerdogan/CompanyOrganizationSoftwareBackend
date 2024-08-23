@@ -1,4 +1,4 @@
-package com.ceylin.companyorganizationSoftware.Controller;
+package com.ceylin.companyorganizationSoftware.Dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-  private String token;
-
+public class LoginRequest {
+    private String email;
+    private String password;
 }

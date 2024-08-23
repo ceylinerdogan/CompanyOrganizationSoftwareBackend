@@ -1,11 +1,13 @@
 package com.ceylin.companyorganizationSoftware.Repository;
 
 import com.ceylin.companyorganizationSoftware.Model.User;
+import com.ceylin.companyorganizationSoftware.Model.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-        Optional<User> findByEmail(String email);
-}
 
+@Repository
+public interface UserRoleRepository extends JpaRepository  <UserRole, Integer>{
+  UserRole findByName(String name);
+
+
+}
