@@ -26,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/activate-user")
-    public ResponseEntity<AuthenticationResponse> activate(@RequestBody ActivateRequest activateRequest) {
+    public ResponseEntity<ActivationResponse> activate(@RequestBody ActivateRequest activateRequest) {
 
         return ResponseEntity.ok(authService.activate(activateRequest));
     }

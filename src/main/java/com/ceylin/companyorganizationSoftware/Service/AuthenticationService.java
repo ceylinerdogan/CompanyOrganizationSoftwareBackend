@@ -48,7 +48,7 @@ public class AuthenticationService {
     return AuthenticationResponse.builder().token(jwt).build();
   }
 
-  public  AuthenticationResponse activate(ActivateRequest activateRequest){
+  public  ActivationResponse activate(ActivateRequest activateRequest){
     var user = userRepository.findByEmail(activateRequest.getEmail())
             .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
@@ -63,15 +63,13 @@ public class AuthenticationService {
     emailService.sendEmail(user.getEmail(), "Activate your account",
             "Click the link to set your password: " + activationLink);
 
-    // In activate method
 
-    var jwt = jwtService.generateToken(user);
-    System.out.println("Generated baerer token: " + jwtService.generateToken(user));
-
-    return AuthenticationResponse.builder().token(jwt).build();
+    return ActivationResponse.ok("Activation Mail sent successfully",token.getToken()).getBody();
   }
   public ResponseEntity<Response<Object>> setPassword(String token, String password) {
+
     System.out.println("Received token: " + token);
+
     var confirmationToken = confirmationTokenRepository.findByToken(token)
             .orElseThrow(() -> new IllegalArgumentException("Invalid token!"));
 
