@@ -26,15 +26,15 @@ public class AuthController {
     }
 
     @PostMapping("/activate-user")
-    public ResponseEntity<ActivationResponse> activate(@RequestBody ActivateRequest activateRequest) {
+    public ResponseEntity<Response<Object>> activate(@RequestBody ActivateRequest activateRequest) {
 
-        return ResponseEntity.ok(authService.activate(activateRequest));
+        return authService.activate(activateRequest.getEmail());
     }
 
-    @PostMapping("/set-password")
-    public ResponseEntity<Response<Object>> setPassword(@RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
+    @PostMapping ("/set-password/{token}")
+    public String setPassword(@PathVariable("token") String token,@RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
 
-        return authService.setPassword(setPasswordRequest.getToken(), setPasswordRequest.getPassword());
+        return authService.setPassword(token,setPasswordRequest.getPassword());
     }
 
 }

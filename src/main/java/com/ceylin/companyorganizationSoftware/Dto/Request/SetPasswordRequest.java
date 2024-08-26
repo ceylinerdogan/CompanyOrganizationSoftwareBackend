@@ -8,6 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SetPasswordRequest {
-  private String token;
   private String password;
 }
