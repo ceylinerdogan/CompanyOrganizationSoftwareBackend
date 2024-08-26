@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private Long id;
 
     @ManyToOne
-    @JoinColumn (name = "Role_ID", nullable = false)
+    @JoinColumn (name = "Role_ID")
     private UserRole userRole;
 
     @ManyToOne

@@ -70,7 +70,7 @@ public class AuthenticationService {
 
     return Response.ok("Activation Mail sent successfully",null);
   }
-  public String setPassword(String token,String password) {
+  public HttpStatus setPassword(String token,String password) {
 
       System.out.println("Received token: " + token);
 
@@ -88,14 +88,14 @@ public class AuthenticationService {
             userRepository.save(user);
             confirmationTokenRepository.delete(confirmationToken);
 
-            return HttpStatus.OK.toString();
+            return HttpStatus.OK;
         }
         else{
-            return  HttpStatus.BAD_REQUEST.toString();
+            return  HttpStatus.BAD_REQUEST;
         }
     }
     else{
-        throw new IllegalArgumentException("Token expired.");
+        return HttpStatus.BAD_REQUEST;
     }
 
   }

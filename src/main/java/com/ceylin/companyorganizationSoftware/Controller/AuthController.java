@@ -7,10 +7,15 @@ import com.ceylin.companyorganizationSoftware.Dto.Request.LoginRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Request.ActivateRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Dto.Request.SetPasswordRequest;
+import com.ceylin.companyorganizationSoftware.Model.User;
+import com.ceylin.companyorganizationSoftware.Repository.UserRepository;
 import com.ceylin.companyorganizationSoftware.Service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationService authService;
 
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
@@ -32,9 +38,15 @@ public class AuthController {
     }
 
     @PostMapping ("/set-password/{token}")
-    public String setPassword(@PathVariable("token") String token,@RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
+    public HttpStatus setPassword(@PathVariable("token") String token, @RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
 
         return authService.setPassword(token,setPasswordRequest.getPassword());
+    }
+
+    @GetMapping ("/getAllUsers")
+    public List<User> getAllUser() throws Exception {
+
+        return userRepository.findAll();
     }
 
 }
