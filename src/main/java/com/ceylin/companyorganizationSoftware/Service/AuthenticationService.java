@@ -2,12 +2,9 @@ package com.ceylin.companyorganizationSoftware.Service;
 
 import com.ceylin.companyorganizationSoftware.Config.JwtService;
 
-import com.ceylin.companyorganizationSoftware.Dto.Request.ActivateRequest;
-import com.ceylin.companyorganizationSoftware.Dto.Request.AddUserRequest;
-import com.ceylin.companyorganizationSoftware.Dto.Request.SetPasswordRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Request.*;
 import com.ceylin.companyorganizationSoftware.Dto.Response.ActivationResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Response.AuthenticationResponse;
-import com.ceylin.companyorganizationSoftware.Dto.Request.LoginRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Model.User;
 import com.ceylin.companyorganizationSoftware.Model.UserRole;
@@ -99,5 +96,48 @@ public class AuthenticationService {
     }
 
   }
+
+    public ResponseEntity<Response<Object>> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        var user = userRepository.findByEmail(resetPasswordRequest.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found!"));
+
+        // Check if the user is active
+        if (user.isEnabled()) {
+            // If the user is active, proceed with generating a reset token
+            ConfirmationToken token = new ConfirmationToken(user);
+            confirmationTokenRepository.save(token);
+
+            String resetLink = "http://localhost:8080/api/auth/reset-password/" + token.getToken();
+            emailService.sendEmail(user.getEmail(), "Reset your password",
+                    "Click the link to reset your password: " + resetLink);
+
+            return Response.ok("Password reset link sent successfully", null);
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Response<>("User is not active. Cannot reset password", null));
+        }
+    }
+
+    public HttpStatus handlePasswordReset(String token, String newPassword) {
+        ConfirmationToken confirmationToken = confirmationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token!"));
+
+        if (!(confirmationToken.getExpiryDate().before(new Date()))) {
+            if (PasswordValidator.isValid(newPassword)) {
+                User user = confirmationToken.getUser();
+                user.setPassword(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                confirmationTokenRepository.delete(confirmationToken);
+
+                return HttpStatus.OK;
+            } else {
+                return HttpStatus.BAD_REQUEST;
+            }
+        } else {
+            return HttpStatus.BAD_REQUEST;
+        }
+    }
+
 
 }

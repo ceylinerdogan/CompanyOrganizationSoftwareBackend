@@ -1,7 +1,9 @@
 package com.ceylin.companyorganizationSoftware.Service;
 
 
+import com.ceylin.companyorganizationSoftware.Controller.UserController;
 import com.ceylin.companyorganizationSoftware.Dto.Request.AddUserRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Request.UpdateUserRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Dto.UserDto;
 import com.ceylin.companyorganizationSoftware.Model.Company;
@@ -16,12 +18,20 @@ import com.ceylin.companyorganizationSoftware.Repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+
 
 
 @Service
@@ -33,6 +43,9 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
 
     private final CompanyRepository companyRepository;
+    private final EmailService emailService;
+
+
 
 
     public ResponseEntity<UserDto> addUser(AddUserRequest addUserRequest) {
@@ -54,7 +67,61 @@ public class UserService {
                 .build();
 
         userRepository.save(newUser);
+
+        // Send an informative email
+        String subject = "Sisteme kullanıcı olarak eklendiniz. Lütfen hesabınızı aktifleştirin.";
+        String frontendUrl = "https://company-organization-software-coral.vercel.app/activateuser";
+        String body = "Merhaba " + newUser.getFirstName() + ",\n\n" +
+                "Company Organization Software Internship Uygulamasına kullanıcı olarak eklendiniz. Lütfen hesabınızı aktifleştirin.\n\n" +
+                "Hesabınızı aktifleştirmek için lütfen aşağıdaki linke tıklayın ve e-posta adresinizi girin:\n" +
+                frontendUrl + "\n\n" +
+                "Teşekkürler.";
+
+        emailService.sendEmail(newUser.getEmail(), subject, body);
         return ResponseEntity.status(HttpStatus.OK).body(getUserById(newUser.getId()).getBody());
+    }
+
+    public Page<UserDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(this::toUserDto);
+    }
+
+    public Page<UserDto> getUsersInDepartment(User manager, Pageable pageable) {
+        return userRepository.findByDepartment(manager.getDepartment(), pageable).map(this::toUserDto);
+    }
+
+    public ResponseEntity<UserDto> updateUser(User currentUser, Long userId, UpdateUserRequest updateUserRequest) {
+
+        // Retrieve the existing user from the database
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        System.out.println("Current User Department: " + currentUser.getDepartment().getName());
+        System.out.println("Existing User Department: " + existingUser.getDepartment().getName());
+        // Check if the current user is an admin or if they belong to the same department as the existing user
+        if (currentUser.getUserRole().getName().equals("ADMIN") ||
+                (currentUser.getUserRole().getName().equals("MANAGER") &&
+                        existingUser.getDepartment().getName().equals(currentUser.getDepartment().getName()))) {
+
+
+
+            UserRole userRole = userRoleRepository.findByName(updateUserRequest.getRole());
+            Department department = departmentRepository.findByName(updateUserRequest.getDepartment());
+            Company company = companyRepository.findByName(updateUserRequest.getCompany());
+
+            existingUser.setUserRole(userRole);
+            existingUser.setFirstName(updateUserRequest.getFirstName());
+            existingUser.setLastName(updateUserRequest.getLastName());
+            existingUser.setEmail(updateUserRequest.getEmail());
+            existingUser.setDepartment(department);
+            existingUser.setCompany(company);
+
+            userRepository.save(existingUser);
+
+            return ResponseEntity.status(HttpStatus.OK).body(getUserById(existingUser.getId()).getBody());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     public ResponseEntity<UserDto> getUserById(Long userId) {

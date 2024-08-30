@@ -1,5 +1,6 @@
 package com.ceylin.companyorganizationSoftware.Config;
 
+import com.ceylin.companyorganizationSoftware.Model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,8 +28,10 @@ public class JwtService {
     return claimsResolver.apply(claims);
   }
 
-  public String generateToken(UserDetails userDetails){
-    return generateToken(new HashMap<>(),userDetails);
+  public String generateToken(User user) {
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("role", user.getUserRole().getName()); // Add the user's role as a claim
+    return generateToken(claims, user);
   }
 
   public String generateToken(Map<String,Object> extraClaims, UserDetails userDetails){

@@ -9,7 +9,7 @@ public class Response<T> {
   private String message;
   private T data;
 
-  private Response(String message, T data) {
+  public Response(String message, T data) {
     this.message = message;
     this.data = data;
   }

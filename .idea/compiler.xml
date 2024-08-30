@@ -7,12 +7,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="CompanyOrganizationSoftwareBackend" />
         <module name="companyorganizationSoftware" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="CompanyOrganizationSoftwareBackend" options="-parameters" />
       <module name="companyorganizationSoftware" options="-parameters" />
     </option>
   </component>

@@ -33,6 +33,11 @@ public class Department {
     @JoinColumn(name = "town",nullable = false)
     private Town town;
 
+
+    @ManyToOne
+    @JoinColumn(name = "Manager_ID", nullable = true)
+    private User manager;
+
     @OneToMany(mappedBy = "parentDepartment")
     private List<DepartmentHierarchy> childDepartments;
 
