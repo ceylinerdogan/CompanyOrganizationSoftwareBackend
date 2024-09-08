@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,8 +43,9 @@ public class UserController {
   })
   @PostMapping("/add-user")
   public ResponseEntity<UserDto> addUser(@RequestBody AddUserRequest addUserRequest) {
-
-    return userService.addUser(addUserRequest);
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    User currentUser = (User) authentication.getPrincipal();
+    return userService.addUser(currentUser, addUserRequest);
   }
 
   // Admin - Get all users
@@ -95,5 +97,19 @@ public class UserController {
     User user = (User) authentication.getPrincipal();
     return userService.updateUser(user, id, updateUserRequest);
   }
+
+  @Operation(summary = "Delete User", description = "Delete a user by their ID. Admin access only.")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+          @ApiResponse(responseCode = "403", description = "Access forbidden"),
+          @ApiResponse(responseCode = "404", description = "User not found")
+  })
+  @DeleteMapping("/delete/{id}")
+  public ResponseEntity<UserDto> deleteUser(@PathVariable Long id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    User currentUser = (User) authentication.getPrincipal();
+    return userService.deleteUser(currentUser, id);
+  }
+
 
 }

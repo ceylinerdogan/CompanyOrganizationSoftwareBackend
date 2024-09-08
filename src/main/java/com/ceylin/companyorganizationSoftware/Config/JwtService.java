@@ -6,14 +6,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -70,5 +69,11 @@ public class JwtService {
   private Key getSigninKey() {
     byte[] keyBytes= Decoders.BASE64.decode(SECRET_KEY);
     return Keys.hmacShaKeyFor(keyBytes);
+  }
+  // Extract authorities (role) from the token
+  public Collection<? extends GrantedAuthority> extractAuthorities(String token) {
+    Claims claims = extractAllClaims(token);
+    String role = claims.get("role", String.class); // Extract the role claim
+    return Collections.singletonList(new SimpleGrantedAuthority(role)); // Return the authority
   }
 }

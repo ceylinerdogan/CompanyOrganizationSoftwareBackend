@@ -48,10 +48,18 @@ public class UserService {
 
 
 
-    public ResponseEntity<UserDto> addUser(AddUserRequest addUserRequest) {
+    public ResponseEntity<UserDto> addUser(User currentUser,AddUserRequest addUserRequest) {
+        Department dep;
+
+        if (currentUser.getUserRole().getName().equals("MANAGER")) {
+            dep = currentUser.getDepartment(); // Manager can only add users to their own department
+        } else if (currentUser.getUserRole().getName().equals("ADMIN")) {
+            dep = departmentRepository.findByName(addUserRequest.getDepartment()); // Admin can choose any department
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Forbidden for non-admin, non-manager users
+        }
 
         UserRole userRole = userRoleRepository.findByName(addUserRequest.getRole());
-        Department department = departmentRepository.findByName(addUserRequest.getDepartment());
         Company company = companyRepository.findByName((addUserRequest.getCompany()));
 
         User newUser = User.builder()
@@ -59,7 +67,7 @@ public class UserService {
                 .firstName(addUserRequest.getFirstName())
                 .lastName(addUserRequest.getLastName())
                 .email(addUserRequest.getEmail())
-                .department(department)
+                .department(dep)
                 .company(company)
                 .password(null)
                 .isEnabled(false)
@@ -91,18 +99,13 @@ public class UserService {
 
     public ResponseEntity<UserDto> updateUser(User currentUser, Long userId, UpdateUserRequest updateUserRequest) {
 
-        // Retrieve the existing user from the database
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        System.out.println("Current User Department: " + currentUser.getDepartment().getName());
-        System.out.println("Existing User Department: " + existingUser.getDepartment().getName());
-        // Check if the current user is an admin or if they belong to the same department as the existing user
+
         if (currentUser.getUserRole().getName().equals("ADMIN") ||
                 (currentUser.getUserRole().getName().equals("MANAGER") &&
                         existingUser.getDepartment().getName().equals(currentUser.getDepartment().getName()))) {
-
-
 
             UserRole userRole = userRoleRepository.findByName(updateUserRequest.getRole());
             Department department = departmentRepository.findByName(updateUserRequest.getDepartment());
@@ -123,6 +126,30 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+    public ResponseEntity<UserDto> deleteUser(User currentUser, Long userId) {
+
+        // Retrieve the existing user from the database
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Check if the current user is an admin or if the user belongs to the same department as the manager
+        if (currentUser.getUserRole().getName().equals("ADMIN") ||
+                (currentUser.getUserRole().getName().equals("MANAGER") &&
+                        existingUser.getDepartment().getId().equals(currentUser.getDepartment().getId()))) {
+
+            // Perform the deletion
+            userRepository.delete(existingUser);
+
+            // Return the deleted user's details in the response
+            return ResponseEntity.status(HttpStatus.OK).body(getUserById(existingUser.getId()).getBody());
+        } else {
+            // Return a 403 Forbidden if the user is not an admin or doesn't have authority
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+    }
+
+
+
 
     public ResponseEntity<UserDto> getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
