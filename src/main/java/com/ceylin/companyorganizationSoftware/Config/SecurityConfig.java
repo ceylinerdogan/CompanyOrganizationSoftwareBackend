@@ -31,7 +31,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("api/auth/**").permitAll()
-                        .requestMatchers("api/user/**").hasAnyAuthority("ADMIN","MANAGER")
+                        .requestMatchers("api/user/upload-profile-picture").hasAnyAuthority("ADMIN", "MANAGER","USER") // Allow authenticated users to upload profile picture
+                        .requestMatchers("api/user/**").hasAnyAuthority("ADMIN", "MANAGER")  // Other user-related operations restricted to admin/manager
                         //.requestMatchers("api/user/update","api/user/update/**").hasAuthority("MANAGER")
                         //.requestMatchers("api/user/delete","api/user/delete/**").hasAuthority("MANAGER")
                         //.requestMatchers("api/user/belonging-department").hasAuthority("MANAGER")

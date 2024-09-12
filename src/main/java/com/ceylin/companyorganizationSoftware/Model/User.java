@@ -54,6 +54,9 @@ public class User implements UserDetails {
     @Column(name = "Deleted_At")
     private LocalDateTime deletedAt;
 
+    @Lob
+    @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
+    private byte[] profilePicture;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

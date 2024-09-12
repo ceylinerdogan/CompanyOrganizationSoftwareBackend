@@ -1,10 +1,7 @@
 package com.ceylin.companyorganizationSoftware.Service;
 
-
-import com.ceylin.companyorganizationSoftware.Controller.UserController;
 import com.ceylin.companyorganizationSoftware.Dto.Request.AddUserRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Request.UpdateUserRequest;
-import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Dto.UserDto;
 import com.ceylin.companyorganizationSoftware.Model.Company;
 import com.ceylin.companyorganizationSoftware.Model.Department;
@@ -18,24 +15,21 @@ import com.ceylin.companyorganizationSoftware.Repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Base64;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-
-
 
 @Service
-@AllArgsConstructor
 public class UserService {
     @Autowired
     private final UserRepository userRepository;
@@ -45,8 +39,22 @@ public class UserService {
     private final CompanyRepository companyRepository;
     private final EmailService emailService;
 
+    private final String uploadDir;
 
-
+    @Autowired
+    public UserService(UserRepository userRepository,
+                       UserRoleRepository userRoleRepository,
+                       DepartmentRepository departmentRepository,
+                       CompanyRepository companyRepository,
+                       EmailService emailService,
+                       @Value("${file.upload-dir}") String uploadDir) {
+        this.userRepository = userRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.departmentRepository = departmentRepository;
+        this.companyRepository = companyRepository;
+        this.emailService = emailService;
+        this.uploadDir = uploadDir;
+    }
 
     public ResponseEntity<UserDto> addUser(User currentUser,AddUserRequest addUserRequest) {
         Department dep;
@@ -148,9 +156,37 @@ public class UserService {
         }
     }
 
+    public ResponseEntity<UserDto> getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        // Convert the profile picture to a base64-encoded string for returning in the DTO
+        String base64ProfilePicture = user.getProfilePicture() != null
+                ? Base64.getEncoder().encodeToString(user.getProfilePicture())
+                : null;
 
+        UserDto userDto = toUserDto(user);
+        userDto.setProfilePicture(base64ProfilePicture);  // Set the base64 image in the DTO
 
+        return ResponseEntity.ok(userDto);
+    }
+
+    public ResponseEntity<String> uploadProfilePicture(User currentUser, MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        // Get the image as a byte array
+        byte[] imageBytes = file.getBytes();
+
+        // Update the user's profile picture with the byte array
+        currentUser.setProfilePicture(imageBytes);
+        userRepository.save(currentUser);  // Save the updated user entity
+
+        return ResponseEntity.ok("Profile picture uploaded successfully");
+    }
+
+    // Get User by ID
     public ResponseEntity<UserDto> getUserById(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isPresent()) {
@@ -159,10 +195,13 @@ public class UserService {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
     }
 
-    private UserDto toUserDto (User user){
+    // Convert User entity to UserDto
+    private UserDto toUserDto(User user) {
+        String base64ProfilePicture = user.getProfilePicture() != null
+                ? Base64.getEncoder().encodeToString(user.getProfilePicture())
+                : null;
 
         return UserDto.builder()
                 .id(user.getId())
@@ -172,6 +211,7 @@ public class UserService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .profilePicture(base64ProfilePicture)  // Return base64-encoded profile picture
                 .build();
     }
 }

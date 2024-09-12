@@ -14,4 +14,5 @@ public class UserDto {
   private String role;
   private String department;
   private String company;
+  private String profilePicture;
 }
