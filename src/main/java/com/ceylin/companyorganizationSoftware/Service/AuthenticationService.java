@@ -60,7 +60,7 @@ public class AuthenticationService {
     confirmationTokenRepository.save(token);
     System.out.println("Generated token: " + token.getToken());
 
-    String activationLink = "http://localhost:8080/api/auth/set-password/"+token.getToken();
+    String activationLink = "https://company-organization-software-coral.vercel.app/setPassword/"+token.getToken();
     emailService.sendEmail(user.getEmail(), "Activate your account",
             "Click the link to set your password: " + activationLink);
 
@@ -107,7 +107,7 @@ public class AuthenticationService {
             ConfirmationToken token = new ConfirmationToken(user);
             confirmationTokenRepository.save(token);
 
-            String resetLink = "http://localhost:8080/api/auth/reset-password/" + token.getToken();
+            String resetLink = "https://company-organization-software-coral.vercel.app/setNewPassword/" + token.getToken();
             emailService.sendEmail(user.getEmail(), "Reset your password",
                     "Click the link to reset your password: " + resetLink);
 

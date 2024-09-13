@@ -65,7 +65,7 @@ public class UserController {
   public ResponseEntity<Page<UserDto>> getAllUsers(
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int size,
-          @RequestParam(defaultValue = "firstName") String sortBy) {
+          @RequestParam(defaultValue = "id") String sortBy) {
 
 
     Page<UserDto> users = userService.getAllUsers(PageRequest.of(page, size, Sort.by(sortBy)));
@@ -82,7 +82,7 @@ public class UserController {
   public ResponseEntity<Page<UserDto>> getUsersInDepartment(
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int size,
-          @RequestParam(defaultValue = "firstName") String sortBy) {
+          @RequestParam(defaultValue = "id") String sortBy) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     User manager = (User) authentication.getPrincipal();
