@@ -5,6 +5,7 @@ import com.ceylin.companyorganizationSoftware.Config.JwtService;
 import com.ceylin.companyorganizationSoftware.Dto.Request.*;
 import com.ceylin.companyorganizationSoftware.Dto.Response.ActivationResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Response.AuthenticationResponse;
+import com.ceylin.companyorganizationSoftware.Dto.Response.ForgotPasswordResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Model.User;
 import com.ceylin.companyorganizationSoftware.Model.UserRole;
@@ -99,45 +100,36 @@ public class AuthenticationService {
 
   }
 
-    public ResponseEntity<Response<Object>> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+    public ResponseEntity<ForgotPasswordResponse<Object>> resetPassword(ResetPasswordRequest resetPasswordRequest) {
         var user = userRepository.findByEmail(resetPasswordRequest.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
-        // Check if the user is active
         if (user.isEnabled()) {
-            // If the user is active, proceed with generating a reset token
             ConfirmationToken token = new ConfirmationToken(user);
             confirmationTokenRepository.save(token);
 
-            // Send reset link without the token in the URL
             String resetLink = "https://company-organization-software-coral.vercel.app/setNewPassword";
             emailService.sendEmail(user.getEmail(), "Reset your password",
                     "Click the link to reset your password: " + resetLink);
 
-            // Return the token in the response, frontend can store it and use it later
-            return Response.ok("Password reset link sent successfully", token.getToken());
+            return ForgotPasswordResponse.ok("Password reset link sent successfully", token.getToken());
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new Response<>("User is not active. Cannot reset password", null));
+            return ForgotPasswordResponse.badRequest("User is not active. Cannot reset password.");
         }
     }
 
-    // Handle Password Reset using the token from request body
     public HttpStatus handlePasswordReset(String token, String newPassword) {
         ConfirmationToken confirmationToken = confirmationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token!"));
 
-        if (!(confirmationToken.getExpiryDate().before(new Date()))) {
-            if (PasswordValidator.isValid(newPassword)) {
-                User user = confirmationToken.getUser();
-                user.setPassword(passwordEncoder.encode(newPassword));
-                userRepository.save(user);
-                confirmationTokenRepository.delete(confirmationToken);
+        if (!(confirmationToken.getExpiryDate().before(new Date())) &&
+                PasswordValidator.isValid(newPassword)) {
+            User user = confirmationToken.getUser();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            confirmationTokenRepository.delete(confirmationToken);
 
-                return HttpStatus.OK;
-            } else {
-                return HttpStatus.BAD_REQUEST;
-            }
+            return HttpStatus.OK;
         } else {
             return HttpStatus.BAD_REQUEST;
         }

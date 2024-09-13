@@ -6,6 +6,7 @@ import com.ceylin.companyorganizationSoftware.Dto.Response.ActivationResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Response.AuthenticationResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Request.LoginRequest;
 import com.ceylin.companyorganizationSoftware.Dto.Request.ActivateRequest;
+import com.ceylin.companyorganizationSoftware.Dto.Response.ForgotPasswordResponse;
 import com.ceylin.companyorganizationSoftware.Dto.Response.Response;
 import com.ceylin.companyorganizationSoftware.Dto.Request.SetPasswordRequest;
 import com.ceylin.companyorganizationSoftware.Model.User;
@@ -70,16 +71,17 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Invalid token or password.");
         }
     }
-    @Operation(summary = "Reset Password", description = "Request a password reset for a user via sending email.")
+    @Operation(summary = "Request Password Reset", description = "Request a password reset for a user via sending email.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password reset request successful"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PostMapping("/forgot-password")
-    public ResponseEntity<Response<Object>> resetPassword(
+    public ResponseEntity<ForgotPasswordResponse<Object>> resetPassword(
             @RequestBody ResetPasswordRequest resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest);
     }
+
     @Operation(summary = "Handle Password Reset", description = "Set a new password using the reset token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password reset successful"),
@@ -97,6 +99,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Invalid token or password.");
         }
     }
+
 
     @GetMapping ("/getAllUsers")
     public List<User> getAllUser() throws Exception {
