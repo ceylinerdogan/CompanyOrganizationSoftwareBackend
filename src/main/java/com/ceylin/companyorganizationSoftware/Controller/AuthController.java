@@ -48,7 +48,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PostMapping("/activate-user")
-    public ResponseEntity<Response<Object>> activate(@RequestBody ActivateRequest activateRequest) {
+    public ResponseEntity<ActivationResponse<Object>> activate(@RequestBody ActivateRequest activateRequest) {
 
         return authService.activate(activateRequest.getEmail());
     }
@@ -57,17 +57,25 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Password set successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid token or password")
     })
-    @PostMapping ("/set-password/{token}")
-    public HttpStatus setPassword(@PathVariable("token") String token, @RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
+    @PostMapping ("/set-password")
+    public ResponseEntity<Object> setPassword(@RequestBody SetPasswordRequest setPasswordRequest) throws Exception {
+        // Now, we are getting the token from the request body.
+        String token = setPasswordRequest.getToken();
+        String password = setPasswordRequest.getPassword();
 
-        return authService.setPassword(token,setPasswordRequest.getPassword());
+        HttpStatus status = authService.setPassword(token, password);
+        if (status == HttpStatus.OK) {
+            return ResponseEntity.ok("Password set successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid token or password.");
+        }
     }
-    @Operation(summary = "Reset Password", description = "Request a password reset for a user.")
+    @Operation(summary = "Reset Password", description = "Request a password reset for a user via sending email.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password reset request successful"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PostMapping("/reset-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<Response<Object>> resetPassword(
             @RequestBody ResetPasswordRequest resetPasswordRequest) {
         return authService.resetPassword(resetPasswordRequest);
@@ -77,11 +85,17 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Password reset successful"),
             @ApiResponse(responseCode = "400", description = "Invalid token or password")
     })
-    @PostMapping("/reset-password/{token}")
-    public HttpStatus handlePasswordReset(
-            @PathVariable("token") String token,
-            @RequestBody SetPasswordRequest setPasswordRequest) {
-        return authService.handlePasswordReset(token, setPasswordRequest.getPassword());
+    @PostMapping("/reset-password")
+    public ResponseEntity<Object> handlePasswordReset(@RequestBody SetPasswordRequest setPasswordRequest) {
+        String token = setPasswordRequest.getToken();
+        String newPassword = setPasswordRequest.getPassword();
+
+        HttpStatus status = authService.handlePasswordReset(token, newPassword);
+        if (status == HttpStatus.OK) {
+            return ResponseEntity.ok("Password reset successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid token or password.");
+        }
     }
 
     @GetMapping ("/getAllUsers")

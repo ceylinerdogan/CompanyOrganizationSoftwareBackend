@@ -49,24 +49,26 @@ public class AuthenticationService {
     return AuthenticationResponse.builder().token(jwt).build();
   }
 
-  public  ResponseEntity<Response<Object>> activate(String email){
-    var user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found!"));
+    public ResponseEntity<ActivationResponse<Object>> activate(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
-    if (user.getPassword() != null || user.isEnabled()) {
-      throw new IllegalStateException("User already activated.");
+        if (user.getPassword() != null || user.isEnabled()) {
+            return ActivationResponse.badRequest("User already activated.");
+        }
+
+        // Generate a confirmation token for the user
+        ConfirmationToken token = new ConfirmationToken(user);
+        confirmationTokenRepository.save(token);
+
+        // Send the activation email without the token in the link
+        String activationLink = "https://company-organization-software-coral.vercel.app/setPassword";
+        emailService.sendEmail(user.getEmail(), "Activate your account",
+                "Click the link to set your password: " + activationLink);
+
+        // Return the token in the response, frontend can store it and use it later
+        return ActivationResponse.ok("Activation mail sent successfully", token.getToken());
     }
-    ConfirmationToken token = new ConfirmationToken(user);
-    confirmationTokenRepository.save(token);
-    System.out.println("Generated token: " + token.getToken());
-
-    String activationLink = "https://company-organization-software-coral.vercel.app/setPassword/"+token.getToken();
-    emailService.sendEmail(user.getEmail(), "Activate your account",
-            "Click the link to set your password: " + activationLink);
-
-
-    return Response.ok("Activation Mail sent successfully",null);
-  }
   public HttpStatus setPassword(String token,String password) {
 
       System.out.println("Received token: " + token);
@@ -107,18 +109,20 @@ public class AuthenticationService {
             ConfirmationToken token = new ConfirmationToken(user);
             confirmationTokenRepository.save(token);
 
-            String resetLink = "https://company-organization-software-coral.vercel.app/setNewPassword/" + token.getToken();
+            // Send reset link without the token in the URL
+            String resetLink = "https://company-organization-software-coral.vercel.app/setNewPassword";
             emailService.sendEmail(user.getEmail(), "Reset your password",
                     "Click the link to reset your password: " + resetLink);
 
-            return Response.ok("Password reset link sent successfully", null);
-        }
-        else{
+            // Return the token in the response, frontend can store it and use it later
+            return Response.ok("Password reset link sent successfully", token.getToken());
+        } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Response<>("User is not active. Cannot reset password", null));
         }
     }
 
+    // Handle Password Reset using the token from request body
     public HttpStatus handlePasswordReset(String token, String newPassword) {
         ConfirmationToken confirmationToken = confirmationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid token!"));
