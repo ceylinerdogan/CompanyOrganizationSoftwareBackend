@@ -13,6 +13,7 @@ C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceyl
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\Request\UpdateUserRequest.java
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\Response\ActivationResponse.java
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\Response\AuthenticationResponse.java
+C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\Response\ForgotPasswordResponse.java
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\Response\Response.java
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Dto\UserDto.java
 C:\Users\ceyli\Desktop\CompanyOrganizationSoftwareBackend\src\main\java\com\ceylin\companyorganizationSoftware\Model\City.java

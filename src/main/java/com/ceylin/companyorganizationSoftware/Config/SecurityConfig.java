@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("api/auth/**").permitAll()
                         .requestMatchers("api/user/upload-profile-picture").hasAnyAuthority("ADMIN", "MANAGER","USER") // Allow authenticated users to upload profile picture
+                        .requestMatchers("api/user/profile").hasAnyAuthority("ADMIN", "MANAGER","USER")
                         .requestMatchers("api/user/**").hasAnyAuthority("ADMIN", "MANAGER")  // Other user-related operations restricted to admin/manager
                         //.requestMatchers("api/user/update","api/user/update/**").hasAuthority("MANAGER")
                         //.requestMatchers("api/user/delete","api/user/delete/**").hasAuthority("MANAGER")
