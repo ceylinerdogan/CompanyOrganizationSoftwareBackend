@@ -55,41 +55,37 @@ public class UserController {
     return userService.addUser(currentUser, addUserRequest);
   }
 
-  // Admin - Get ALL users
-  @Operation(summary = "Get All Users for Admin", description = "Retrieve all users. Admin access only.")
+  // Get ALL users
+  @Operation(summary = "Get Users", description = "Retrieve all users for Admins, and department-specific users for Managers.")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
           @ApiResponse(responseCode = "403", description = "Access forbidden")
   })
-  @GetMapping("/all")
-  public ResponseEntity<Page<UserDto>> getAllUsers(
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "10") int size,
-          @RequestParam(defaultValue = "id") String sortBy) {
-
-
-    Page<UserDto> users = userService.getAllUsers(PageRequest.of(page, size, Sort.by(sortBy)));
-    return ResponseEntity.ok(users);
-  }
-
-  // Manager - Get users in manager's department
-  @Operation(summary = "Get Users in Department for Manager", description = "Retrieve all users in the manager's department.")
-  @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
-          @ApiResponse(responseCode = "403", description = "Access forbidden")
-  })
-  @GetMapping("/belonging-department")
-  public ResponseEntity<Page<UserDto>> getUsersInDepartment(
+  @GetMapping("/users")
+  public ResponseEntity<Page<UserDto>> getUsers(
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int size,
           @RequestParam(defaultValue = "id") String sortBy) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    User manager = (User) authentication.getPrincipal();
+    User currentUser = (User) authentication.getPrincipal();
 
-    Page<UserDto> users = userService.getUsersInDepartment(manager, PageRequest.of(page, size, Sort.by(sortBy)));
+    Page<UserDto> users;
+
+    if (currentUser.getUserRole().getName().equals("ADMIN")) {
+      // If the user is an Admin, fetch all users
+      users = userService.getAllUsers(PageRequest.of(page, size, Sort.by(sortBy)));
+    } else if (currentUser.getUserRole().getName().equals("MANAGER")) {
+      // If the user is a Manager, fetch only users in the manager's department
+      users = userService.getUsersInDepartment(currentUser, PageRequest.of(page, size, Sort.by(sortBy)));
+    } else {
+      // If neither, return forbidden
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
     return ResponseEntity.ok(users);
   }
+
 
   // Admin/Manager - UPDATE
   @Operation(summary = "Update User for both Admin and Manager", description = "Update user information. Admins can update any user, managers can update users in their department.")
