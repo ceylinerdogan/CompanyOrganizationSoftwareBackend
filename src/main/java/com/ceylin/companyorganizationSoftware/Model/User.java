@@ -1,6 +1,7 @@
 package com.ceylin.companyorganizationSoftware.Model;
 
 
+import com.ceylin.companyorganizationSoftware.token.ConfirmationToken;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Setter
 @Getter
@@ -57,6 +59,10 @@ public class User implements UserDetails {
     @Lob
     @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
     private byte[] profilePicture;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConfirmationToken> confirmationTokens;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

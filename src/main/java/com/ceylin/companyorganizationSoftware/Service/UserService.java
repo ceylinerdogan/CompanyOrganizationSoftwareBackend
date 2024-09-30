@@ -12,6 +12,7 @@ import com.ceylin.companyorganizationSoftware.Repository.DepartmentRepository;
 import com.ceylin.companyorganizationSoftware.Repository.UserRepository;
 
 import com.ceylin.companyorganizationSoftware.Repository.UserRoleRepository;
+import com.ceylin.companyorganizationSoftware.token.ConfirmationTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,6 +41,7 @@ public class UserService {
     private final EmailService emailService;
 
     private final String uploadDir;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -47,13 +49,16 @@ public class UserService {
                        DepartmentRepository departmentRepository,
                        CompanyRepository companyRepository,
                        EmailService emailService,
-                       @Value("${file.upload-dir}") String uploadDir) {
+                       ConfirmationTokenRepository confirmationTokenRepository,
+                       @Value("${file.upload-dir}") String uploadDir)
+    {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.departmentRepository = departmentRepository;
         this.companyRepository = companyRepository;
         this.emailService = emailService;
         this.uploadDir = uploadDir;
+        this.confirmationTokenRepository = confirmationTokenRepository;
     }
 
     public ResponseEntity<UserDto> addUser(User currentUser,AddUserRequest addUserRequest) {
@@ -97,12 +102,15 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK).body(getUserById(newUser.getId()).getBody());
     }
 
-    public Page<UserDto> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(this::toUserDto);
-    }
-
-    public Page<UserDto> getUsersInDepartment(User manager, Pageable pageable) {
-        return userRepository.findByDepartment(manager.getDepartment(), pageable).map(this::toUserDto);
+    // Get all users for Admin, and users in the department for Managers
+    public Page<UserDto> getUsers(User currentUser, Pageable pageable) {
+        if (currentUser.getUserRole().getName().equals("ADMIN")) {
+            return userRepository.findAll(pageable).map(this::toUserDto);
+        } else if (currentUser.getUserRole().getName().equals("MANAGER")) {
+            return userRepository.findByDepartment(currentUser.getDepartment(), pageable).map(this::toUserDto);
+        } else {
+            throw new IllegalStateException("Unauthorized access");
+        }
     }
 
     public ResponseEntity<UserDto> updateUser(User currentUser, Long userId, UpdateUserRequest updateUserRequest) {
@@ -145,6 +153,7 @@ public class UserService {
                 (currentUser.getUserRole().getName().equals("MANAGER") &&
                         existingUser.getDepartment().getId().equals(currentUser.getDepartment().getId()))) {
 
+            confirmationTokenRepository.deleteByUser(existingUser);
             // Perform the deletion
             userRepository.delete(existingUser);
 

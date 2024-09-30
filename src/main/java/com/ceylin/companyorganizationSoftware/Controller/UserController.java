@@ -55,8 +55,8 @@ public class UserController {
     return userService.addUser(currentUser, addUserRequest);
   }
 
-  // Get ALL users
-  @Operation(summary = "Get Users", description = "Retrieve all users for Admins, and department-specific users for Managers.")
+  // Get all users (Admin) or users in the department (Manager)
+  @Operation(summary = "Get Users for Admin/Manager", description = "Admins can retrieve all users, Managers can retrieve users within their department.")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
           @ApiResponse(responseCode = "403", description = "Access forbidden")
@@ -70,22 +70,9 @@ public class UserController {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     User currentUser = (User) authentication.getPrincipal();
 
-    Page<UserDto> users;
-
-    if (currentUser.getUserRole().getName().equals("ADMIN")) {
-      // If the user is an Admin, fetch all users
-      users = userService.getAllUsers(PageRequest.of(page, size, Sort.by(sortBy)));
-    } else if (currentUser.getUserRole().getName().equals("MANAGER")) {
-      // If the user is a Manager, fetch only users in the manager's department
-      users = userService.getUsersInDepartment(currentUser, PageRequest.of(page, size, Sort.by(sortBy)));
-    } else {
-      // If neither, return forbidden
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
-
+    Page<UserDto> users = userService.getUsers(currentUser, PageRequest.of(page, size, Sort.by(sortBy)));
     return ResponseEntity.ok(users);
   }
-
 
   // Admin/Manager - UPDATE
   @Operation(summary = "Update User for both Admin and Manager", description = "Update user information. Admins can update any user, managers can update users in their department.")
