@@ -89,16 +89,6 @@ public class UserService {
 
         userRepository.save(newUser);
 
-        // Send an informative email
-        String subject = "Sisteme kullanıcı olarak eklendiniz. Lütfen hesabınızı aktifleştirin.";
-        String frontendUrl = "https://company-organization-software-coral.vercel.app/activateuser";
-        String body = "Merhaba " + newUser.getFirstName() + ",\n\n" +
-                "Company Organization Software Internship Uygulamasına kullanıcı olarak eklendiniz. Lütfen hesabınızı aktifleştirin.\n\n" +
-                "Hesabınızı aktifleştirmek için lütfen aşağıdaki linke tıklayın ve e-posta adresinizi girin:\n" +
-                frontendUrl + "\n\n" +
-                "Teşekkürler.";
-
-        emailService.sendEmail(newUser.getEmail(), subject, body);
         return ResponseEntity.status(HttpStatus.OK).body(getUserById(newUser.getId()).getBody());
     }
 
